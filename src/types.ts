@@ -24,3 +24,12 @@ export interface StatusPayload {
     state: 'pending' | 'success' | 'failure' | 'error'
     branches: StatusBranch[]
 }
+
+export interface PullRequestReviewPayload {
+    pull_request: {
+        number: number
+        head: {
+            sha: string
+        }
+    }
+}
