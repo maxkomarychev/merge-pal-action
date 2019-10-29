@@ -1,6 +1,4 @@
 import { Client, Context, StatusPayload } from './types'
-import { REPL_MODE_SLOPPY } from 'repl'
-import Octokit = require('@octokit/rest')
 
 export default async function statusHandler(client: Client, context: Context) {
     const event = context.payload as StatusPayload
