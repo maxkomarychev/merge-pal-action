@@ -45,7 +45,7 @@ with the content:
           - test1-that
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action
+          - uses: maxkomarychev/merge-pal-action@v0.1.0
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -69,7 +69,7 @@ executed every time a 3rdparty service finishes the check:
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action
+          - uses: maxkomarychev/merge-pal-action@v0.1.0
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 
