@@ -1,0 +1,14 @@
+name: Merge Pal
+description: Automatically merge PR once it is ready!
+inputs:
+  token:
+    required: true
+    description: "Token to perform api calls"
+
+runs:
+  using: node12
+  main: bin/index.js
+
+branding:
+  icon: git-merge
+  color: green
