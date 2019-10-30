@@ -5,11 +5,7 @@ export default async function prHandler(client: Client, context: Context) {
     const {
         number,
         head: { sha },
-        mergeable,
     } = pr
-    if (!mergeable) {
-        return
-    }
     await client.pulls.merge({
         ...context.repo,
         pull_number: number,

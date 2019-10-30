@@ -11,7 +11,6 @@ export interface PullRequestPayload {
     head: {
         sha: string
     }
-    mergeable: boolean
 }
 
 interface StatusBranch {

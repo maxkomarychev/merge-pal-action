@@ -10840,10 +10840,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function prHandler(client, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const pr = context.payload.pull_request;
-        const { number, head: { sha }, mergeable, } = pr;
-        if (!mergeable) {
-            return;
-        }
+        const { number, head: { sha }, } = pr;
         yield client.pulls.merge(Object.assign(Object.assign({}, context.repo), { pull_number: number, sha }));
     });
 }
