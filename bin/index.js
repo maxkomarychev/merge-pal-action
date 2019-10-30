@@ -1459,18 +1459,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prHandler_1 = __importDefault(__webpack_require__(931));
 const statusHandler_1 = __importDefault(__webpack_require__(638));
+const reviewHandler_1 = __importDefault(__webpack_require__(657));
 function main(core, github) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput('token');
         const client = new github.GitHub(token);
         console.log('ctx', JSON.stringify(github.context));
         const event = github.context.eventName;
+        console.log('EVENT!!!', event);
         switch (event) {
             case 'pull_request':
                 yield prHandler_1.default(client, github.context);
                 break;
             case 'status':
                 yield statusHandler_1.default(client, github.context);
+                break;
+            case 'pull_request_review':
+                yield reviewHandler_1.default(client, github.context);
                 break;
         }
     });
@@ -7824,6 +7829,29 @@ if (process.platform === 'linux') {
     'SIGUNUSED'
   )
 }
+
+
+/***/ }),
+
+/***/ 657:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function reviewHandler(client, context) {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+exports.default = reviewHandler;
 
 
 /***/ }),
