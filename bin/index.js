@@ -7834,7 +7834,7 @@ if (process.platform === 'linux') {
 /***/ }),
 
 /***/ 657:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -7847,9 +7847,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const mergeIfReady_1 = __importDefault(__webpack_require__(743));
 function reviewHandler(client, context) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        const event = context.payload;
+        yield mergeIfReady_1.default(client, context.repo.owner, context.repo.repo, event.pull_request.number, event.pull_request.head.sha);
+    });
 }
 exports.default = reviewHandler;
 
@@ -8050,6 +8057,45 @@ function sync (path, options) {
     }
   }
 }
+
+
+/***/ }),
+
+/***/ 743:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function mergeIfReady(client, owner, repo, number, sha) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pr = yield client.pulls.get({
+            owner,
+            repo,
+            pull_number: number,
+        });
+        console.log('raw pr', pr);
+        console.log('pr and mergeable', pr.data.number, pr.data.mergeable, pr.data.mergeable_state);
+        if (pr.data.mergeable) {
+            yield client.pulls.merge({
+                owner,
+                repo,
+                pull_number: number,
+                sha,
+            });
+        }
+    });
+}
+exports.default = mergeIfReady;
 
 
 /***/ }),
