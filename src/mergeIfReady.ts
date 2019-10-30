@@ -19,7 +19,7 @@ export default async function mergeIfReady(
         pr.data.mergeable,
         pr.data.mergeable_state,
     )
-    if (pr.data.mergeable) {
+    if (pr.data.mergeable && pr.data.mergeable_state === 'clean') {
         await client.pulls.merge({
             owner,
             repo,

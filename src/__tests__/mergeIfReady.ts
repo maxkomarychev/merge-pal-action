@@ -15,13 +15,17 @@ describe('mergeIfReady', () => {
         merge.mockClear()
         get.mockClear()
     })
-    it('merges pr if it is mergeable', async () => {
+    it('merges pr if it is mergeable and merging allowed', async () => {
         const prNumber = 42
         const repo = 'repo'
         const owner = 'owner'
         const sha = 'abcdef'
         get.mockReturnValue({
-            data: { number: prNumber, mergeable: true },
+            data: {
+                number: prNumber,
+                mergeable: true,
+                mergeable_state: 'clean',
+            },
         })
         await mergeIfReady(
             (client as unknown) as Client,
@@ -50,7 +54,38 @@ describe('mergeIfReady', () => {
         const owner = 'owner'
         const sha = 'abcdef'
         get.mockReturnValueOnce({
-            data: { number: prNumber, mergeable: false },
+            data: {
+                number: prNumber,
+                mergeable: false,
+                mergeable_state: 'clean',
+            },
+        })
+        await mergeIfReady(
+            (client as unknown) as Client,
+            owner,
+            repo,
+            prNumber,
+            sha,
+        )
+        expect(get).toHaveBeenCalledTimes(1)
+        expect(get).toHaveBeenCalledWith({
+            owner,
+            repo,
+            pull_number: prNumber,
+        })
+        expect(merge).toHaveBeenCalledTimes(0)
+    })
+    it('does not merge pr if it is not clean', async () => {
+        const prNumber = 42
+        const repo = 'repo'
+        const owner = 'owner'
+        const sha = 'abcdef'
+        get.mockReturnValueOnce({
+            data: {
+                number: prNumber,
+                mergeable: true,
+                mergeable_state: 'dirty',
+            },
         })
         await mergeIfReady(
             (client as unknown) as Client,

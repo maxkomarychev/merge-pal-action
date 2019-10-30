@@ -8085,7 +8085,7 @@ function mergeIfReady(client, owner, repo, number, sha) {
         });
         console.log('raw pr', pr);
         console.log('pr and mergeable', pr.data.number, pr.data.mergeable, pr.data.mergeable_state);
-        if (pr.data.mergeable) {
+        if (pr.data.mergeable && pr.data.mergeable_state === 'clean') {
             yield client.pulls.merge({
                 owner,
                 repo,
