@@ -4,7 +4,7 @@ This action will automatically merge your PR once all requirements are met!
 
 # v1 Roadmap
 
-- [ ] handle pr reviews
+- [x] handle pr reviews
 - [ ] various types of merge: squash and rebase
 - [ ] blacklist based on labels
 - [ ] whitelist based on labels
@@ -60,7 +60,13 @@ executed every time a 3rdparty service finishes the check:
     ```yml
     name: Merge Pal (Status)
 
-    on: status
+    on:
+      status: {}
+      pull_request_review:
+        types:
+          - submitted
+          - edited
+          - dismissed
 
     jobs:
       print-event:

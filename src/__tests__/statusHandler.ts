@@ -1,3 +1,6 @@
+const mergeIfReady = jest.fn()
+jest.mock('../mergeIfReady', () => mergeIfReady)
+
 import statusHandler from '../statusHandler'
 import { Client, Context } from '../types'
 
@@ -45,6 +48,21 @@ describe('status handler', () => {
             (client as unknown) as Client,
             (context as unknown) as Context,
         )
+        expect(mergeIfReady).toHaveBeenCalledTimes(2)
+        expect(mergeIfReady).toHaveBeenCalledWith(
+            client,
+            owner,
+            repo,
+            2,
+            'abcdef',
+        )
+        expect(mergeIfReady).toHaveBeenCalledWith(
+            client,
+            owner,
+            repo,
+            3,
+            'abcdef',
+        )
         expect(client.pulls.list).toHaveBeenCalledTimes(3)
         expect(client.pulls.list).toHaveBeenNthCalledWith(1, {
             owner,
@@ -63,23 +81,6 @@ describe('status handler', () => {
             repo,
             state: 'open',
             head: 'third',
-        })
-        expect(get).toBeCalledTimes(2)
-        expect(get).toHaveBeenNthCalledWith(1, {
-            repo,
-            owner,
-            pull_number: 2,
-        })
-        expect(get).toHaveBeenNthCalledWith(2, {
-            repo,
-            owner,
-            pull_number: 3,
-        })
-        expect(merge).toHaveBeenCalledWith({
-            repo,
-            owner,
-            pull_number: 3,
-            sha: 'abcdef',
         })
     })
 })

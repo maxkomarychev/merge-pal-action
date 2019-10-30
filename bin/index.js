@@ -1459,11 +1459,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prHandler_1 = __importDefault(__webpack_require__(931));
 const statusHandler_1 = __importDefault(__webpack_require__(638));
+const reviewHandler_1 = __importDefault(__webpack_require__(657));
 function main(core, github) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput('token');
         const client = new github.GitHub(token);
-        console.log('ctx', JSON.stringify(github.context));
+        console.log('context', JSON.stringify(github.context));
         const event = github.context.eventName;
         switch (event) {
             case 'pull_request':
@@ -1471,6 +1472,9 @@ function main(core, github) {
                 break;
             case 'status':
                 yield statusHandler_1.default(client, github.context);
+                break;
+            case 'pull_request_review':
+                yield reviewHandler_1.default(client, github.context);
                 break;
         }
     });
@@ -7695,7 +7699,7 @@ module.exports = isPlainObject;
 /***/ }),
 
 /***/ 638:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -7708,7 +7712,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const mergeIfReady_1 = __importDefault(__webpack_require__(743));
 function statusHandler(client, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const event = context.payload;
@@ -7716,15 +7724,9 @@ function statusHandler(client, context) {
         console.log('Commit belongs to branches: ', branchNames);
         const prs = yield Promise.all(branchNames.map((branch) => client.pulls.list(Object.assign(Object.assign({}, context.repo), { head: branch, state: 'open' }))));
         const flatPRs = prs.flatMap((item) => {
-            console.log('item', JSON.stringify(item));
             return item.data.map((pr) => pr);
         });
-        console.log('found prs', flatPRs.map((pr) => pr.number));
-        const fullPRs = yield Promise.all(flatPRs.map((pr) => client.pulls.get(Object.assign(Object.assign({}, context.repo), { pull_number: pr.number }))));
-        console.log('prs mergeability', fullPRs.map((pr) => `${pr.data.number} :: ${pr.data.mergeable}`));
-        yield Promise.all(fullPRs
-            .filter((pr) => pr.data.mergeable)
-            .map((pr) => client.pulls.merge(Object.assign(Object.assign({}, context.repo), { pull_number: pr.data.number, sha: event.sha }))));
+        yield Promise.all(flatPRs.map((pr) => mergeIfReady_1.default(client, context.repo.owner, context.repo.repo, pr.number, event.sha)));
     });
 }
 exports.default = statusHandler;
@@ -7824,6 +7826,36 @@ if (process.platform === 'linux') {
     'SIGUNUSED'
   )
 }
+
+
+/***/ }),
+
+/***/ 657:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const mergeIfReady_1 = __importDefault(__webpack_require__(743));
+function reviewHandler(client, context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const event = context.payload;
+        yield mergeIfReady_1.default(client, context.repo.owner, context.repo.repo, event.pull_request.number, event.pull_request.head.sha);
+    });
+}
+exports.default = reviewHandler;
 
 
 /***/ }),
@@ -8022,6 +8054,45 @@ function sync (path, options) {
     }
   }
 }
+
+
+/***/ }),
+
+/***/ 743:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function mergeIfReady(client, owner, repo, number, sha) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pr = yield client.pulls.get({
+            owner,
+            repo,
+            pull_number: number,
+        });
+        console.log('raw pr', pr);
+        console.log('pr and mergeable', pr.data.number, pr.data.mergeable, pr.data.mergeable_state);
+        if (pr.data.mergeable && pr.data.mergeable_state === 'clean') {
+            yield client.pulls.merge({
+                owner,
+                repo,
+                pull_number: number,
+                sha,
+            });
+        }
+    });
+}
+exports.default = mergeIfReady;
 
 
 /***/ }),
@@ -10823,7 +10894,7 @@ function hasNextPage (link) {
 /***/ }),
 
 /***/ 931:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -10836,12 +10907,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const mergeIfReady_1 = __importDefault(__webpack_require__(743));
 function prHandler(client, context) {
     return __awaiter(this, void 0, void 0, function* () {
+        const { repo: { repo, owner }, } = context;
         const pr = context.payload.pull_request;
         const { number, head: { sha }, } = pr;
-        yield client.pulls.merge(Object.assign(Object.assign({}, context.repo), { pull_number: number, sha }));
+        yield mergeIfReady_1.default(client, owner, repo, number, sha);
     });
 }
 exports.default = prHandler;

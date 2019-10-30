@@ -1,11 +1,9 @@
-const mockPRHandler = jest.fn((a, b, c) => {
-    console.log('pr', a, b, c)
-})
+const mockPRHandler = jest.fn()
 jest.mock('../prHandler', () => mockPRHandler)
-const mockStatusHandler = jest.fn((a, b, c) => {
-    console.log('status', a, b, c)
-})
+const mockStatusHandler = jest.fn()
 jest.mock('../statusHandler', () => mockStatusHandler)
+const mockReviewHandler = jest.fn()
+jest.mock('../reviewHandler', () => mockReviewHandler)
 
 import main from '../main'
 import { CoreModule, GitHubModule } from '../types'
@@ -14,6 +12,7 @@ describe('main behavior', () => {
     afterEach(() => {
         mockStatusHandler.mockClear()
         mockPRHandler.mockClear()
+        mockReviewHandler.mockClear()
     })
     describe('basic things', () => {
         it('should read inputs and initialize client', async () => {
@@ -55,6 +54,7 @@ describe('main behavior', () => {
                 github.context,
             )
             expect(mockStatusHandler).toHaveBeenCalledTimes(0)
+            expect(mockReviewHandler).toHaveBeenCalledTimes(0)
         })
     })
     describe('behavior on status', () => {
@@ -75,7 +75,33 @@ describe('main behavior', () => {
                 (github as unknown) as GitHubModule,
             )
             expect(mockPRHandler).toHaveBeenCalledTimes(0)
+            expect(mockReviewHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledWith(
+                fakeClient,
+                github.context,
+            )
+        })
+    })
+    describe('behavior on review', () => {
+        it('should call review handler on review event', async () => {
+            const mockInput = jest.fn().mockReturnValueOnce('token-123')
+            const core = {
+                getInput: mockInput,
+            }
+            const fakeClient = {}
+            const github = {
+                context: {
+                    eventName: 'pull_request_review',
+                },
+                GitHub: jest.fn().mockReturnValue(fakeClient),
+            }
+            await main(
+                (core as unknown) as CoreModule,
+                (github as unknown) as GitHubModule,
+            )
+            expect(mockPRHandler).toHaveBeenCalledTimes(0)
+            expect(mockStatusHandler).toHaveBeenCalledTimes(0)
+            expect(mockReviewHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
             )

@@ -1,30 +1,36 @@
 const mergeIfReady = jest.fn()
 jest.mock('../mergeIfReady', () => mergeIfReady)
-import prHandler from '../prHandler'
+
+import reviewHandler from '../reviewHandler'
 import { Client, Context } from '../types'
 
-describe('merge processor', () => {
-    it('calls mergeIfReady', async () => {
-        const client = {
-            pulls: {
-                merge: jest.fn(),
-            },
-        }
-        const repo = 'nyan cat'
+const mockList = jest.fn()
+const merge = jest.fn()
+const get = jest.fn()
+
+const client = {
+    pulls: {
+        list: mockList,
+        merge,
+        get,
+    },
+}
+
+describe('review handler', () => {
+    it('should try to merge pr for which review has been given', async () => {
         const owner = 'john doe'
+        const repo = 'repo'
         const context = {
-            repo: {
-                repo,
-                owner,
-            },
+            repo: { repo, owner },
+            eventName: 'pull_request_review',
             payload: {
                 pull_request: {
-                    number: 100500,
+                    number: 42,
                     head: { sha: 'abcdef' },
                 },
             },
         }
-        await prHandler(
+        await reviewHandler(
             (client as unknown) as Client,
             (context as unknown) as Context,
         )
@@ -33,7 +39,7 @@ describe('merge processor', () => {
             client,
             owner,
             repo,
-            100500,
+            42,
             'abcdef',
         )
     })
