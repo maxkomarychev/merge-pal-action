@@ -89,7 +89,7 @@ describe('main behavior', () => {
         })
     })
     describe('behavior on review', () => {
-        it.only('should call review handler on review event', async () => {
+        it('should call review handler on review event', async () => {
             const mockInput = jest.fn().mockReturnValueOnce('token-123')
             const core = {
                 getInput: mockInput,
