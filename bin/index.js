@@ -7700,7 +7700,7 @@ module.exports = isPlainObject;
 /***/ }),
 
 /***/ 638:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -7713,7 +7713,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const mergeIfReady_1 = __importDefault(__webpack_require__(743));
 function statusHandler(client, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const event = context.payload;
@@ -7724,12 +7728,31 @@ function statusHandler(client, context) {
             console.log('item', JSON.stringify(item));
             return item.data.map((pr) => pr);
         });
-        console.log('found prs', flatPRs.map((pr) => pr.number));
-        const fullPRs = yield Promise.all(flatPRs.map((pr) => client.pulls.get(Object.assign(Object.assign({}, context.repo), { pull_number: pr.number }))));
-        console.log('prs mergeability', fullPRs.map((pr) => `${pr.data.number} :: ${pr.data.mergeable}`));
-        yield Promise.all(fullPRs
-            .filter((pr) => pr.data.mergeable)
-            .map((pr) => client.pulls.merge(Object.assign(Object.assign({}, context.repo), { pull_number: pr.data.number, sha: event.sha }))));
+        yield Promise.all(flatPRs.map((pr) => mergeIfReady_1.default(client, context.repo.owner, context.repo.repo, pr.number, event.sha)));
+        // console.log('found prs', flatPRs.map((pr) => pr.number))
+        // const fullPRs = await Promise.all(
+        //     flatPRs.map((pr) =>
+        //         client.pulls.get({
+        //             ...context.repo,
+        //             pull_number: pr.number,
+        //         }),
+        //     ),
+        // )
+        // console.log(
+        //     'prs mergeability',
+        //     fullPRs.map((pr) => `${pr.data.number} :: ${pr.data.mergeable}`),
+        // )
+        // await Promise.all(
+        //     fullPRs
+        //         .filter((pr) => pr.data.mergeable)
+        //         .map((pr) =>
+        //             client.pulls.merge({
+        //                 ...context.repo,
+        //                 pull_number: pr.data.number,
+        //                 sha: event.sha,
+        //             }),
+        //         ),
+        // )
     });
 }
 exports.default = statusHandler;
