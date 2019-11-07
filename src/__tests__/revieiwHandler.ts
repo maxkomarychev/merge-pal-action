@@ -2,7 +2,7 @@ const mergeIfReady = jest.fn()
 jest.mock('../mergeIfReady', () => mergeIfReady)
 
 import reviewHandler from '../reviewHandler'
-import { Client, Context } from '../types'
+import { Client, Context, Config } from '../types'
 
 const mockList = jest.fn()
 const merge = jest.fn()
@@ -30,9 +30,11 @@ describe('review handler', () => {
                 },
             },
         }
+        const fakeConfig = {}
         await reviewHandler(
             (client as unknown) as Client,
             (context as unknown) as Context,
+            (fakeConfig as unknown) as Config,
         )
         expect(mergeIfReady).toHaveBeenCalledTimes(1)
         expect(mergeIfReady).toHaveBeenCalledWith(
@@ -41,6 +43,7 @@ describe('review handler', () => {
             repo,
             42,
             'abcdef',
+            fakeConfig,
         )
     })
 })

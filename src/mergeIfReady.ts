@@ -1,4 +1,5 @@
-import { Client } from './types'
+import { Client, Config } from './types'
+import canMerge from './canMerge'
 
 export default async function mergeIfReady(
     client: Client,
@@ -6,6 +7,7 @@ export default async function mergeIfReady(
     repo: string,
     number: number,
     sha: string,
+    config: Config,
 ) {
     const pr = await client.pulls.get({
         owner,
@@ -19,7 +21,7 @@ export default async function mergeIfReady(
         pr.data.mergeable,
         pr.data.mergeable_state,
     )
-    if (pr.data.mergeable && pr.data.mergeable_state === 'clean') {
+    if (canMerge(pr.data, config.whitelist, config.blacklist)) {
         await client.pulls.merge({
             owner,
             repo,

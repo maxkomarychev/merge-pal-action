@@ -1,0 +1,4 @@
+whitelist:
+  - white
+blacklist:
+  - black

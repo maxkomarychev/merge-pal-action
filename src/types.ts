@@ -6,6 +6,11 @@ export type GitHubModule = typeof github
 export type Context = typeof github.context
 export type Client = github.GitHub
 
+export interface Config {
+    whitelist: string[]
+    blacklist: string[]
+}
+
 export interface PullRequestPayload {
     number: number
     head: {

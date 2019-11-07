@@ -1,7 +1,11 @@
-import { Client, Context, StatusPayload } from './types'
+import { Client, Context, StatusPayload, Config } from './types'
 import mergeIfReady from './mergeIfReady'
 
-export default async function statusHandler(client: Client, context: Context) {
+export default async function statusHandler(
+    client: Client,
+    context: Context,
+    config: Config,
+) {
     const event = context.payload as StatusPayload
     const branchNames = event.branches.map((branch) => branch.name)
     console.log('Commit belongs to branches: ', branchNames)
@@ -25,6 +29,7 @@ export default async function statusHandler(client: Client, context: Context) {
                 context.repo.repo,
                 pr.number,
                 event.sha,
+                config,
             ),
         ),
     )

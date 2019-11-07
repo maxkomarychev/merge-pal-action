@@ -2,7 +2,7 @@ const mergeIfReady = jest.fn()
 jest.mock('../mergeIfReady', () => mergeIfReady)
 
 import statusHandler from '../statusHandler'
-import { Client, Context } from '../types'
+import { Client, Context, Config } from '../types'
 
 const mockList = jest.fn()
 const merge = jest.fn()
@@ -39,6 +39,7 @@ describe('status handler', () => {
                 ],
             },
         }
+        const fakeConfig = {}
         mockList.mockReturnValueOnce({ data: [] })
         mockList.mockReturnValueOnce({ data: [{ number: 2 }] })
         mockList.mockReturnValueOnce({ data: [{ number: 3 }] })
@@ -47,6 +48,7 @@ describe('status handler', () => {
         await statusHandler(
             (client as unknown) as Client,
             (context as unknown) as Context,
+            (fakeConfig as unknown) as Config,
         )
         expect(mergeIfReady).toHaveBeenCalledTimes(2)
         expect(mergeIfReady).toHaveBeenCalledWith(
@@ -55,6 +57,7 @@ describe('status handler', () => {
             repo,
             2,
             'abcdef',
+            fakeConfig,
         )
         expect(mergeIfReady).toHaveBeenCalledWith(
             client,
@@ -62,6 +65,7 @@ describe('status handler', () => {
             repo,
             3,
             'abcdef',
+            fakeConfig,
         )
         expect(client.pulls.list).toHaveBeenCalledTimes(3)
         expect(client.pulls.list).toHaveBeenNthCalledWith(1, {

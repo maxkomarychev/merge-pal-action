@@ -6,8 +6,8 @@ This action will automatically merge your PR once all requirements are met!
 
 - [x] handle pr reviews
 - [ ] various types of merge: squash and rebase
-- [ ] blacklist based on labels
-- [ ] whitelist based on labels
+- [x] blacklist based on labels
+- [x] whitelist based on labels
 
 # Usage
 
@@ -45,20 +45,19 @@ with the content:
           - test1-that
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.1.0
+          - uses: maxkomarychev/merge-pal-action@v0.3.0
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 
     ```
 
 
-3. If you are using other checks maintained by 3rdparty services you'd need to
-add another workflow relevant for `status` events. This workflow will be 
-executed every time a 3rdparty service finishes the check:
+3. Rest of the events (labels, 3rdparty statuses etc) will be handled with 
+separate workflow: `.github/workflows/merge-pal-other.yml` 
 
 
     ```yml
-    name: Merge Pal (Status)
+    name: Merge Pal (Other)
 
     on:
       status: {}
@@ -67,6 +66,10 @@ executed every time a 3rdparty service finishes the check:
           - submitted
           - edited
           - dismissed
+      pull_request:
+        types:
+          - labeled
+          - unlabeled
 
     jobs:
       print-event:
@@ -75,7 +78,7 @@ executed every time a 3rdparty service finishes the check:
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.1.0
+          - uses: maxkomarychev/merge-pal-action@v0.3.0
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 

@@ -4,6 +4,9 @@ const mockStatusHandler = jest.fn()
 jest.mock('../statusHandler', () => mockStatusHandler)
 const mockReviewHandler = jest.fn()
 jest.mock('../reviewHandler', () => mockReviewHandler)
+const fakeConfig = {}
+const mockReadConfig = jest.fn().mockReturnValue(fakeConfig)
+jest.mock('../readConfig', () => mockReadConfig)
 
 import main from '../main'
 import { CoreModule, GitHubModule } from '../types'
@@ -13,6 +16,7 @@ describe('main behavior', () => {
         mockStatusHandler.mockClear()
         mockPRHandler.mockClear()
         mockReviewHandler.mockClear()
+        mockReadConfig.mockClear()
     })
     describe('basic things', () => {
         it('should read inputs and initialize client', async () => {
@@ -49,9 +53,12 @@ describe('main behavior', () => {
                 (core as unknown) as CoreModule,
                 (github as unknown) as GitHubModule,
             )
+            expect(mockReadConfig).toHaveBeenCalledTimes(1)
+            expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
             expect(mockPRHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
+                fakeConfig,
             )
             expect(mockStatusHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledTimes(0)
@@ -74,11 +81,14 @@ describe('main behavior', () => {
                 (core as unknown) as CoreModule,
                 (github as unknown) as GitHubModule,
             )
+            expect(mockReadConfig).toHaveBeenCalledTimes(1)
+            expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
             expect(mockPRHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
+                fakeConfig,
             )
         })
     })
@@ -99,11 +109,14 @@ describe('main behavior', () => {
                 (core as unknown) as CoreModule,
                 (github as unknown) as GitHubModule,
             )
+            expect(mockReadConfig).toHaveBeenCalledTimes(1)
+            expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
             expect(mockPRHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
+                fakeConfig,
             )
         })
     })

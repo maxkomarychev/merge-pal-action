@@ -1,7 +1,7 @@
 const mergeIfReady = jest.fn()
 jest.mock('../mergeIfReady', () => mergeIfReady)
 import prHandler from '../prHandler'
-import { Client, Context } from '../types'
+import { Client, Context, Config } from '../types'
 
 describe('merge processor', () => {
     it('calls mergeIfReady', async () => {
@@ -24,9 +24,11 @@ describe('merge processor', () => {
                 },
             },
         }
+        const fakeConfig = {}
         await prHandler(
             (client as unknown) as Client,
             (context as unknown) as Context,
+            (fakeConfig as unknown) as Config,
         )
         expect(mergeIfReady).toHaveBeenCalledTimes(1)
         expect(mergeIfReady).toHaveBeenCalledWith(
@@ -35,6 +37,7 @@ describe('merge processor', () => {
             repo,
             100500,
             'abcdef',
+            fakeConfig,
         )
     })
 })

@@ -1,7 +1,11 @@
-import { Client, Context, PullRequestPayload } from './types'
+import { Client, Context, PullRequestPayload, Config } from './types'
 import mergeIfReady from './mergeIfReady'
 
-export default async function prHandler(client: Client, context: Context) {
+export default async function prHandler(
+    client: Client,
+    context: Context,
+    config: Config,
+) {
     const {
         repo: { repo, owner },
     } = context
@@ -10,5 +14,5 @@ export default async function prHandler(client: Client, context: Context) {
         number,
         head: { sha },
     } = pr
-    await mergeIfReady(client, owner, repo, number, sha)
+    await mergeIfReady(client, owner, repo, number, sha, config)
 }
