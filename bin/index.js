@@ -11785,6 +11785,7 @@ function mergeIfReady(client, owner, repo, number, sha, config) {
                 repo,
                 pull_number: number,
                 sha,
+                merge_method: config.method,
             });
         }
     });

@@ -19,7 +19,13 @@ describe('mergeIfReady', () => {
         get.mockClear()
         canMerge.mockClear()
     })
-    it('merges pr it can be merged', async () => {
+    it.each`
+        method
+        ${undefined}
+        ${'merge'}
+        ${'squash'}
+        ${'rebase'}
+    `('merges pr with $method if it can be merged', async ({ method }) => {
         const prNumber = 42
         const repo = 'repo'
         const owner = 'owner'
@@ -38,6 +44,7 @@ describe('mergeIfReady', () => {
         const config: Config = {
             whitelist,
             blacklist,
+            method,
         }
         await mergeIfReady(
             (client as unknown) as Client,
@@ -61,6 +68,7 @@ describe('mergeIfReady', () => {
             repo,
             pull_number: prNumber,
             sha,
+            merge_method: method,
         })
     })
     it('does not merge pr if it is not allowed to merge', async () => {

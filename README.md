@@ -5,7 +5,7 @@ This action will automatically merge your PR once all requirements are met!
 # v1 Roadmap
 
 - [x] handle pr reviews
-- [ ] various types of merge: squash and rebase
+- [x] various types of merge: squash and rebase
 - [x] blacklist based on labels
 - [x] whitelist based on labels
 
@@ -93,3 +93,4 @@ It can hold the following fields:
 | --- | --- | --- |
 | whitelist | string[] | whitelisted labels to perform automerge |
 | blacklist | string[] | blacklisted labels to forbid automerge |
+| method | "merge" \| "squash" \| "rebase" | method to use when merging |

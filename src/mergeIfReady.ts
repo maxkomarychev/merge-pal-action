@@ -27,6 +27,7 @@ export default async function mergeIfReady(
             repo,
             pull_number: number,
             sha,
+            merge_method: config.method,
         })
     }
 }
