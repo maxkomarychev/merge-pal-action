@@ -13443,21 +13443,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(__webpack_require__(747));
 const js_yaml_1 = __importDefault(__webpack_require__(414));
+function parseConfig(rawConfig) {
+    const result = { whitelist: [], blacklist: [], method: undefined };
+    if (rawConfig && rawConfig.whitelist) {
+        if (Array.isArray(rawConfig.whitelist)) {
+            result.whitelist = rawConfig.whitelist;
+        }
+        else {
+            throw new Error('`whitelist` should be an array');
+        }
+    }
+    if (rawConfig && rawConfig.blacklist) {
+        if (Array.isArray(rawConfig.blacklist)) {
+            result.blacklist = rawConfig.blacklist;
+        }
+        else {
+            throw new Error('`blacklist` should be an array');
+        }
+    }
+    if (rawConfig && rawConfig.method) {
+        const allowedString = ['squash', 'merge', 'rebase'];
+        if (typeof rawConfig.method !== 'string' ||
+            !allowedString.includes(rawConfig.method)) {
+            throw new Error(`'method' should be either 'merge', 'rebase', 'squash' or 'undefined', got ${rawConfig.method}`);
+        }
+        result.method = rawConfig.method;
+    }
+    return result;
+}
+exports.parseConfig = parseConfig;
+function getFileData(filename) {
+    try {
+        return fs.readFileSync(filename).toString();
+    }
+    catch (error) {
+        console.log(`Did not find config ${filename}`);
+        return '';
+    }
+}
 function readConfig(filename) {
     const cwd = process.cwd();
     console.log('cwd', cwd);
-    try {
-        const data = fs.readFileSync(filename).toString();
-        const yaml = js_yaml_1.default.safeLoad(data);
-        return {
-            whitelist: yaml.whitelist || [],
-            blacklist: yaml.blacklist || [],
-        };
-    }
-    catch (error) {
-        console.warn('error reading config', error);
-        return { whitelist: [], blacklist: [] };
-    }
+    const data = getFileData(filename);
+    const yaml = js_yaml_1.default.safeLoad(data);
+    return parseConfig(yaml);
 }
 exports.default = readConfig;
 
