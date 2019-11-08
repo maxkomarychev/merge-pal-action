@@ -83,3 +83,13 @@ separate workflow: `.github/workflows/merge-pal-other.yml`
               token: ${{ secrets.GITHUB_TOKEN }}
 
     ```
+
+## Configuration
+
+Create file `.mergepal.yml` in root folder of your repo.
+It can hold the following fields:
+
+| field | type | description |
+| --- | --- | --- |
+| whitelist | string[] | whitelisted labels to perform automerge |
+| blacklist | string[] | blacklisted labels to forbid automerge |
