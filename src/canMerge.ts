@@ -15,18 +15,15 @@ export function canMergeByLabels(
         return true
     }
     const labels = pr.labels.map((label) => label.name)
-    if (blacklist.length) {
-        const matchedBlack = labels.filter((label) => blacklist.includes(label))
-        if (matchedBlack.length > 0) {
-            return false
-        } else {
-            return true
-        }
+    const matchedBlack = labels.filter((label) => blacklist.includes(label))
+    const matchedWhite = labels.filter((label) => whitelist.includes(label))
+    if (blacklist.length > 0 && matchedBlack.length > 0) {
+        return false
     }
-    if (whitelist.length) {
-        const matchedWhite = labels.filter((label) => whitelist.includes(label))
-        return matchedWhite.length > 0
+    if (whitelist.length > 0 && matchedWhite.length === 0) {
+        return false
     }
+    return true
 }
 
 export default function canMerge(

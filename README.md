@@ -45,7 +45,7 @@ with the content:
           - test1-that
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.4.0
+          - uses: maxkomarychev/merge-pal-action@v0.4.1
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -78,7 +78,7 @@ separate workflow: `.github/workflows/merge-pal-other.yml`
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.4.0
+          - uses: maxkomarychev/merge-pal-action@v0.4.1
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 

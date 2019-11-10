@@ -77,6 +77,13 @@ describe('canMergeByLabels', () => {
             ),
         ).toEqual(false)
     })
+    it('disallows merge when whitelist and blacklists exist but labels are empty', () => {
+        const whitelist = ['white']
+        const blacklist = ['black']
+        expect(
+            canMergeByLabels(createPR(false, '', []), whitelist, blacklist),
+        ).toEqual(false)
+    })
     it('disallows merge even if one label matches blacklist', () => {
         const whitelist = []
         const blacklist = ['black']
