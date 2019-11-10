@@ -94,3 +94,7 @@ It can hold the following fields:
 | whitelist | string[] | whitelisted labels to perform automerge |
 | blacklist | string[] | blacklisted labels to forbid automerge |
 | method | "merge" \| "squash" \| "rebase" | method to use when merging |
+
+## Friendly actions
+
+- [PR updater](https://github.com/maxkomarychev/pr-updater-action) - keeps your pull requests in sync with main branch
