@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/maxkomarychev/merge-pal-action/compare/v0.4.0...v0.4.1) (2019-11-10)
+
+
+### Bug Fixes
+
+* whitelist/blacklist algorithm ([4f1ebfa](https://github.com/maxkomarychev/merge-pal-action/commit/4f1ebfab4babf96f49e2d5e8f1a6efe4ec2c35b4))
+
 ## [0.4.0](https://github.com/maxkomarychev/merge-pal-action/compare/v0.3.0...v0.4.0) (2019-11-10)
 
 
