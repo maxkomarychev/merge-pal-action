@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/maxkomarychev/merge-pal-action/compare/v0.3.0...v0.4.0) (2019-11-10)
+
+
+### Features
+
+* better config ([8495c3c](https://github.com/maxkomarychev/merge-pal-action/commit/8495c3ce019ccbbb833a1e02aa6bbe3dd190fc1a))
+* merge with specified method ([c7e7635](https://github.com/maxkomarychev/merge-pal-action/commit/c7e76354f1ac9c76244d491e67469efeb3573ae6))
+
 ## [0.3.0](https://github.com/maxkomarychev/merge-pal-action/compare/v0.2.0...v0.3.0) (2019-11-07)
 
 
