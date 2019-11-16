@@ -2,13 +2,13 @@ import pushHandler from '../pushHandler'
 import { Client, Context, Config } from '../types'
 
 const mockList = jest.fn()
-const merge = jest.fn()
+const mockUpdateBranch = jest.fn()
 const get = jest.fn()
 
 const client = {
     pulls: {
         list: mockList,
-        // merge,
+        updateBranch: mockUpdateBranch,
         get,
     },
 }
@@ -23,13 +23,21 @@ describe('pushHandler', () => {
             payload: {
                 ref: 'refs/heads/master',
                 after: 'abcdef',
-                // pull_request: {
-                //     number: 42,
-                //     head: { sha: 'abcdef' },
-                // },
             },
         }
         const config = {}
+        mockList.mockResolvedValueOnce({
+            data: [
+                {
+                    number: 10,
+                    head: { sha: 'def' },
+                },
+                {
+                    number: 100,
+                    head: { sha: 'xyz' },
+                },
+            ],
+        })
         await pushHandler(
             (client as unknown) as Client,
             (context as unknown) as Context,
@@ -40,6 +48,18 @@ describe('pushHandler', () => {
             repo,
             state: 'open',
             base: 'master',
+        })
+        expect(mockUpdateBranch).toHaveBeenNthCalledWith(1, {
+            repo,
+            owner,
+            pull_number: 10,
+            expected_head_sha: 'def',
+        })
+        expect(mockUpdateBranch).toHaveBeenNthCalledWith(2, {
+            repo,
+            owner,
+            pull_number: 100,
+            expected_head_sha: 'xyz',
         })
     })
 })
