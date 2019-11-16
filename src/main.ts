@@ -2,6 +2,7 @@ import prHandler from './prHandler'
 import { CoreModule, GitHubModule } from './types'
 import statusHandler from './statusHandler'
 import reviewHandler from './reviewHandler'
+import pushHandler from './pushHandler'
 import readConfig from './readConfig'
 
 export default async function main(core: CoreModule, github: GitHubModule) {
@@ -20,6 +21,9 @@ export default async function main(core: CoreModule, github: GitHubModule) {
             break
         case 'pull_request_review':
             await reviewHandler(client, github.context, config)
+            break
+        case 'push':
+            await pushHandler(client, github.context, config)
             break
     }
 }
