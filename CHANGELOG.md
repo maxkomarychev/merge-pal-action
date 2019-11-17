@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/maxkomarychev/merge-pal-action/compare/v0.4.1...v0.5.0) (2019-11-17)
+
+
+### Features
+
+* automatically update branches when base branch is pushed ([3a0f081](https://github.com/maxkomarychev/merge-pal-action/commit/3a0f081eb1561f3b36360ab251a7dc5cfdcba29d))
+
 ### [0.4.1](https://github.com/maxkomarychev/merge-pal-action/compare/v0.4.0...v0.4.1) (2019-11-10)
 
 
