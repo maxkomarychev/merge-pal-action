@@ -2,15 +2,36 @@
 
 This action will help your prs to get merged!
 
+# Contents
+
+- [Features](#features)
+- [Usage](#usage)
+  - [Note about tokens](#note-about-tokens)
+  - [Quick start](#quick-start)
+  - [Configuration](#configuration)
+
 # Features
 
 - relises on mergability rules defined in your repository
 - automatically updates your PR to be up to date with base branch
-- supports whie and black lists through labels
+- supports white and black lists through labels
 - supports various types of merge: normal, squash and rebase
-- integrates seamlessly into GitHub Actions workflows as well as any 3rdparty
+- integrates seamlessly into GitHub Actions workflows as well as other 3rdparty checks
 
 # Usage
+
+## Note about tokens
+
+Due to existing restriction workflows can not trigger each other if they are 
+authorized with `secrets.GITHUB_TOKEN`. For instance if you are using workflows that runs when code is pushed to master it will not be triggered if `secrets.GITHUB_TOKEN` is used to authorize Merge Pal. In such a scenarion you have to create [personal access token](https://github.com/settings/tokens) and use it instead.
+
+```yml
+  - uses: maxkomarychev/merge-pal-action@vX.Y.Z
+    with:
+      token: ${{ secrets.MY_USER_TOKEN }}
+```
+
+## Quick Start
 
 1. Specify desired mergeability rules in branch settings in your repository
 
@@ -20,14 +41,14 @@ This action will help your prs to get merged!
     name: Merge Pal (events)
 
     on:
-      push: {} # listen to push events and update prs depending on a branch
-      status: {} # listen to commit status updates from 3rdparty integrations
-      pull_request_review: # listen to reviews given to PR
+      push: {} # update PR when base branch is updated
+      status: {} # try to merge when other checks are completed
+      pull_request_review: # try to merge after review
         types:
           - submitted
           - edited
           - dismissed
-      pull_request: # this is needed to support white/black lists
+      pull_request: # try to merge if labels have changed (white/black list)
         types:
           - labeled
           - unlabeled
@@ -58,15 +79,15 @@ This action will help your prs to get merged!
           - opened
 
     jobs:
-      test-this:
+      test-this: # test one things
         runs-on: ubuntu-latest
         steps:
           - run: echo "All ok"
-      test-that:
+      test-that: # test other things
         runs-on: ubuntu-latest
         steps:
           - run: echo "All ok"
-      mergepal-merge:
+      mergepal-merge: # run merge pal in the end
         runs-on: ubuntu-latest
         needs:
           # make sure all required jobs are listed here
