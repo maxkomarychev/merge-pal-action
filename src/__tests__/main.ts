@@ -4,6 +4,8 @@ const mockStatusHandler = jest.fn()
 jest.mock('../statusHandler', () => mockStatusHandler)
 const mockReviewHandler = jest.fn()
 jest.mock('../reviewHandler', () => mockReviewHandler)
+const fakePushHandler = jest.fn()
+jest.mock('../pushHandler', () => fakePushHandler)
 const fakeConfig = {}
 const mockReadConfig = jest.fn().mockReturnValue(fakeConfig)
 jest.mock('../readConfig', () => mockReadConfig)
@@ -60,6 +62,7 @@ describe('main behavior', () => {
                 github.context,
                 fakeConfig,
             )
+            expect(fakePushHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledTimes(0)
         })
@@ -85,6 +88,7 @@ describe('main behavior', () => {
             expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
             expect(mockPRHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledTimes(0)
+            expect(fakePushHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
@@ -113,7 +117,37 @@ describe('main behavior', () => {
             expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
             expect(mockPRHandler).toHaveBeenCalledTimes(0)
             expect(mockStatusHandler).toHaveBeenCalledTimes(0)
+            expect(fakePushHandler).toHaveBeenCalledTimes(0)
             expect(mockReviewHandler).toHaveBeenCalledWith(
+                fakeClient,
+                github.context,
+                fakeConfig,
+            )
+        })
+    })
+    describe('behavior on push', () => {
+        it('should call push handler on push event', async () => {
+            const mockInput = jest.fn().mockReturnValueOnce('token-123')
+            const core = {
+                getInput: mockInput,
+            }
+            const fakeClient = {}
+            const github = {
+                context: {
+                    eventName: 'push',
+                },
+                GitHub: jest.fn().mockReturnValue(fakeClient),
+            }
+            await main(
+                (core as unknown) as CoreModule,
+                (github as unknown) as GitHubModule,
+            )
+            expect(mockReadConfig).toHaveBeenCalledTimes(1)
+            expect(mockReadConfig).toHaveBeenCalledWith('.mergepal.yml')
+            expect(mockPRHandler).toHaveBeenCalledTimes(0)
+            expect(mockStatusHandler).toHaveBeenCalledTimes(0)
+            expect(mockReviewHandler).toHaveBeenCalledTimes(0)
+            expect(fakePushHandler).toHaveBeenCalledWith(
                 fakeClient,
                 github.context,
                 fakeConfig,

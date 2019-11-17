@@ -1,22 +1,51 @@
 # Merge Pal
 
-This action will automatically merge your PR once all requirements are met!
+This action will help your prs to get merged!
 
-# v1 Roadmap
+# Features
 
-- [x] handle pr reviews
-- [x] various types of merge: squash and rebase
-- [x] blacklist based on labels
-- [x] whitelist based on labels
+- relises on mergability rules defined in your repository
+- automatically updates your PR to be up to date with base branch
+- supports whie and black lists through labels
+- supports various types of merge: normal, squash and rebase
+- integrates seamlessly into GitHub Actions workflows as well as any 3rdparty
 
 # Usage
 
 1. Specify desired mergeability rules in branch settings in your repository
 
-2. If you already have another github actions executed on PR just add Merge Pal 
-action in the end of the execution by specifying other jobs via `needs` key.
-Or if you just starting: simply add file `.github/workflows/merge-pal-pr.yml` 
-with the content:
+2. Create workflow to handle various events that affect mergeability of PR (`.github/workflows/merge-pal-events.yml`):
+
+    ```yml
+    name: Merge Pal (events)
+
+    on:
+      push: {} # listen to push events and update prs depending on a branch
+      status: {} # listen to commit status updates from 3rdparty integrations
+      pull_request_review: # listen to reviews given to PR
+        types:
+          - submitted
+          - edited
+          - dismissed
+      pull_request: # this is needed to support white/black lists
+        types:
+          - labeled
+          - unlabeled
+
+    jobs:
+      # thats's all. single step is needed - if PR is mergeable according to
+      # branch protection rules it will be merged automatically
+      mergepal:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v1
+          - uses: maxkomarychev/merge-pal-action@vX.Y.Z
+            with:
+              token: ${{ secrets.GITHUB_TOKEN }}
+
+    ```
+
+3. Add Merge Pal to the end of your existing check (if any) with GitHub Actions
 
 
     ```yml
@@ -45,46 +74,16 @@ with the content:
           - test1-that
         steps:
           - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.4.1
+          - uses: maxkomarychev/merge-pal-action@vX.Y.Z
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
 
     ```
 
-
-3. Rest of the events (labels, 3rdparty statuses etc) will be handled with 
-separate workflow: `.github/workflows/merge-pal-other.yml` 
-
-
-    ```yml
-    name: Merge Pal (Other)
-
-    on:
-      status: {}
-      pull_request_review:
-        types:
-          - submitted
-          - edited
-          - dismissed
-      pull_request:
-        types:
-          - labeled
-          - unlabeled
-
-    jobs:
-      print-event:
-        runs-on: ubuntu-latest
-      merge-pal:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v1
-          - uses: maxkomarychev/merge-pal-action@v0.4.1
-            with:
-              token: ${{ secrets.GITHUB_TOKEN }}
-
-    ```
 
 ## Configuration
+
+Various aspects of Merge Pal's behavior are configured thorugh configuration file.
 
 Create file `.mergepal.yml` in root folder of your repo.
 It can hold the following fields:
@@ -95,6 +94,13 @@ It can hold the following fields:
 | blacklist | string[] | blacklisted labels to forbid automerge |
 | method | "merge" \| "squash" \| "rebase" | method to use when merging |
 
-## Friendly actions
+example:
 
-- [PR updater](https://github.com/maxkomarychev/pr-updater-action) - keeps your pull requests in sync with main branch
+```yml
+whitelist:
+  - good-to-merge
+blacklist:
+  - wip
+  - do-not-merge
+method: squash
+```

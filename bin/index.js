@@ -2007,6 +2007,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const prHandler_1 = __importDefault(__webpack_require__(931));
 const statusHandler_1 = __importDefault(__webpack_require__(638));
 const reviewHandler_1 = __importDefault(__webpack_require__(657));
+const pushHandler_1 = __importDefault(__webpack_require__(320));
 const readConfig_1 = __importDefault(__webpack_require__(857));
 function main(core, github) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2025,6 +2026,9 @@ function main(core, github) {
                 break;
             case 'pull_request_review':
                 yield reviewHandler_1.default(client, github.context, config);
+                break;
+            case 'push':
+                yield pushHandler_1.default(client, github.context, config);
                 break;
         }
     });
@@ -4461,6 +4465,36 @@ function octokitRestNormalizeGitReferenceResponses(octokit) {
 /***/ (function(module) {
 
 module.exports = {"name":"@octokit/graphql","version":"2.1.3","publishConfig":{"access":"public"},"description":"GitHub GraphQL API client for browsers and Node","main":"index.js","scripts":{"prebuild":"mkdirp dist/","build":"npm-run-all build:*","build:development":"webpack --mode development --entry . --output-library=octokitGraphql --output=./dist/octokit-graphql.js --profile --json > dist/bundle-stats.json","build:production":"webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=octokitGraphql --output-path=./dist --output-filename=octokit-graphql.min.js --devtool source-map","bundle-report":"webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html","coverage":"nyc report --reporter=html && open coverage/index.html","coverage:upload":"nyc report --reporter=text-lcov | coveralls","pretest":"standard","test":"nyc mocha test/*-test.js","test:browser":"cypress run --browser chrome"},"repository":{"type":"git","url":"https://github.com/octokit/graphql.js.git"},"keywords":["octokit","github","api","graphql"],"author":"Gregor Martynus (https://github.com/gr2m)","license":"MIT","bugs":{"url":"https://github.com/octokit/graphql.js/issues"},"homepage":"https://github.com/octokit/graphql.js#readme","dependencies":{"@octokit/request":"^5.0.0","universal-user-agent":"^2.0.3"},"devDependencies":{"chai":"^4.2.0","compression-webpack-plugin":"^2.0.0","coveralls":"^3.0.3","cypress":"^3.1.5","fetch-mock":"^7.3.1","mkdirp":"^0.5.1","mocha":"^6.0.0","npm-run-all":"^4.1.3","nyc":"^14.0.0","semantic-release":"^15.13.3","simple-mock":"^0.8.0","standard":"^12.0.1","webpack":"^4.29.6","webpack-bundle-analyzer":"^3.1.0","webpack-cli":"^3.2.3"},"bundlesize":[{"path":"./dist/octokit-graphql.min.js.gz","maxSize":"5KB"}],"release":{"publish":["@semantic-release/npm",{"path":"@semantic-release/github","assets":["dist/*","!dist/*.map.gz"]}]},"standard":{"globals":["describe","before","beforeEach","afterEach","after","it","expect"]},"files":["lib"]};
+
+/***/ }),
+
+/***/ 320:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function pushHandler(client, context, config) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const payload = context.payload;
+        const components = payload.ref.split('/');
+        const branchName = components[components.length - 1];
+        const openedPrs = yield client.pulls.list(Object.assign(Object.assign({}, context.repo), { state: 'open', base: branchName }));
+        console.log('opened prs', openedPrs);
+        yield Promise.all(openedPrs.data.map((pr) => client.pulls.updateBranch(Object.assign(Object.assign({}, context.repo), { pull_number: pr.number, expected_head_sha: pr.head.sha }))));
+    });
+}
+exports.default = pushHandler;
+
 
 /***/ }),
 

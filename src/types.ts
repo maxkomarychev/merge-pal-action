@@ -38,3 +38,8 @@ export interface PullRequestReviewPayload {
         }
     }
 }
+
+export interface PushPayload {
+    ref: string
+    after: string
+}
