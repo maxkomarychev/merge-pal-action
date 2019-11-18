@@ -1,5 +1,6 @@
 import { Client, Config } from './types'
 import canMerge from './canMerge'
+import isEnabledForPR from './isEnabledForPR'
 
 export default async function mergeIfReady(
     client: Client,
@@ -14,6 +15,9 @@ export default async function mergeIfReady(
         repo,
         pull_number: number,
     })
+    if (!isEnabledForPR(pr.data, config.whitelist, config.blacklist)) {
+        return
+    }
     console.log('raw pr', pr)
     console.log(
         'pr and mergeable',

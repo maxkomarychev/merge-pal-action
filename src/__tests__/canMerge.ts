@@ -1,8 +1,4 @@
-import {
-    canMergeByMergeable,
-    canMergeByMergeableState,
-    canMergeByLabels,
-} from '../canMerge'
+import { canMergeByMergeable, canMergeByMergeableState } from '../canMerge'
 import Octokit = require('@octokit/rest')
 
 export function createPR(
@@ -40,81 +36,4 @@ describe('canMergeByMergeableState', () => {
             ).toEqual(true)
         },
     )
-})
-
-describe('canMergeByLabels', () => {
-    it('allows merge with any labels if blacklist and whitelist are empty', () => {
-        expect(canMergeByLabels(createPR(false, '', []), [], [])).toBe(true)
-        expect(canMergeByLabels(createPR(false, '', ['white']), [], [])).toBe(
-            true,
-        )
-        expect(canMergeByLabels(createPR(false, '', ['black']), [], [])).toBe(
-            true,
-        )
-        expect(
-            canMergeByLabels(createPR(false, '', ['white', 'black']), [], []),
-        ).toBe(true)
-    })
-    it('allows merge if whitelist label exists while blacklist is empty', () => {
-        const whitelist = ['white']
-        const blacklist = []
-        expect(
-            canMergeByLabels(
-                createPR(false, '', ['white', 'black']),
-                whitelist,
-                blacklist,
-            ),
-        ).toEqual(true)
-    })
-    it('disallows merge if no labels match whitelist', () => {
-        const whitelist = ['white']
-        const blacklist = []
-        expect(
-            canMergeByLabels(
-                createPR(false, '', ['yellow', 'black']),
-                whitelist,
-                blacklist,
-            ),
-        ).toEqual(false)
-    })
-    it('disallows merge when whitelist and blacklists exist but labels are empty', () => {
-        const whitelist = ['white']
-        const blacklist = ['black']
-        expect(
-            canMergeByLabels(createPR(false, '', []), whitelist, blacklist),
-        ).toEqual(false)
-    })
-    it('disallows merge even if one label matches blacklist', () => {
-        const whitelist = []
-        const blacklist = ['black']
-        expect(
-            canMergeByLabels(
-                createPR(false, '', ['yellow', 'white', 'black']),
-                whitelist,
-                blacklist,
-            ),
-        ).toEqual(false)
-    })
-    it('allows merge when none of pr labels match blacklist', () => {
-        const whitelist = []
-        const blacklist = ['black']
-        expect(
-            canMergeByLabels(
-                createPR(false, '', ['yellow', 'white']),
-                whitelist,
-                blacklist,
-            ),
-        ).toEqual(true)
-    })
-    it('disallows merge when both black and white labels match', () => {
-        const whitelist = ['white']
-        const blacklist = ['black']
-        expect(
-            canMergeByLabels(
-                createPR(false, '', ['white', 'black']),
-                whitelist,
-                blacklist,
-            ),
-        ).toBe(false)
-    })
 })

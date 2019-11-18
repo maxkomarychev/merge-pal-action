@@ -6,26 +6,6 @@ export function canMergeByMergeable(pr: Octokit.PullsGetResponse) {
 export function canMergeByMergeableState(pr: Octokit.PullsGetResponse) {
     return pr.mergeable_state === 'clean' || pr.mergeable_state === 'unstable'
 }
-export function canMergeByLabels(
-    pr: Octokit.PullsGetResponse,
-    whitelist: string[],
-    blacklist: string[],
-) {
-    if (whitelist.length === 0 && blacklist.length === 0) {
-        return true
-    }
-    const labels = pr.labels.map((label) => label.name)
-    const matchedBlack = labels.filter((label) => blacklist.includes(label))
-    const matchedWhite = labels.filter((label) => whitelist.includes(label))
-    if (blacklist.length > 0 && matchedBlack.length > 0) {
-        return false
-    }
-    if (whitelist.length > 0 && matchedWhite.length === 0) {
-        return false
-    }
-    return true
-}
-
 export default function canMerge(
     pr: Octokit.PullsGetResponse,
     whitelist: string[],
@@ -33,9 +13,7 @@ export default function canMerge(
 ) {
     const byMergeable = canMergeByMergeable(pr)
     const byMergeableState = canMergeByMergeableState(pr)
-    const byLabels = canMergeByLabels(pr, whitelist, blacklist)
     console.log('by mergeable', byMergeable)
     console.log('by mergeable state', byMergeableState)
-    console.log('by labels', byLabels)
-    return byMergeable && byMergeableState && byLabels
+    return byMergeable && byMergeableState
 }

@@ -4469,7 +4469,7 @@ module.exports = {"name":"@octokit/graphql","version":"2.1.3","publishConfig":{"
 /***/ }),
 
 /***/ 320:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -4482,7 +4482,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const isEnabledForPR_1 = __importDefault(__webpack_require__(520));
 function pushHandler(client, context, config) {
     return __awaiter(this, void 0, void 0, function* () {
         const payload = context.payload;
@@ -4490,7 +4494,12 @@ function pushHandler(client, context, config) {
         const branchName = components[components.length - 1];
         const openedPrs = yield client.pulls.list(Object.assign(Object.assign({}, context.repo), { state: 'open', base: branchName }));
         console.log('opened prs', openedPrs);
-        yield Promise.all(openedPrs.data.map((pr) => client.pulls.updateBranch(Object.assign(Object.assign({}, context.repo), { pull_number: pr.number, expected_head_sha: pr.head.sha }))));
+        yield Promise.all(openedPrs.data.map((pr) => {
+            if (!isEnabledForPR_1.default(pr, config.whitelist, config.blacklist)) {
+                return;
+            }
+            return client.pulls.updateBranch(Object.assign(Object.assign({}, context.repo), { pull_number: pr.number, expected_head_sha: pr.head.sha }));
+        }));
     });
 }
 exports.default = pushHandler;
@@ -9721,6 +9730,32 @@ function addHook (state, kind, name, hook) {
 
 /***/ }),
 
+/***/ 520:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function isEnabledForPR(pr, whitelist, blacklist) {
+    if (whitelist.length === 0 && blacklist.length === 0) {
+        return true;
+    }
+    const labels = pr.labels.map((label) => label.name);
+    const matchedBlack = labels.filter((label) => blacklist.includes(label));
+    const matchedWhite = labels.filter((label) => whitelist.includes(label));
+    if (blacklist.length > 0 && matchedBlack.length > 0) {
+        return false;
+    }
+    if (whitelist.length > 0 && matchedWhite.length === 0) {
+        return false;
+    }
+    return true;
+}
+exports.default = isEnabledForPR;
+
+
+/***/ }),
+
 /***/ 523:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -10192,30 +10227,12 @@ function canMergeByMergeableState(pr) {
     return pr.mergeable_state === 'clean' || pr.mergeable_state === 'unstable';
 }
 exports.canMergeByMergeableState = canMergeByMergeableState;
-function canMergeByLabels(pr, whitelist, blacklist) {
-    if (whitelist.length === 0 && blacklist.length === 0) {
-        return true;
-    }
-    const labels = pr.labels.map((label) => label.name);
-    const matchedBlack = labels.filter((label) => blacklist.includes(label));
-    const matchedWhite = labels.filter((label) => whitelist.includes(label));
-    if (blacklist.length > 0 && matchedBlack.length > 0) {
-        return false;
-    }
-    if (whitelist.length > 0 && matchedWhite.length === 0) {
-        return false;
-    }
-    return true;
-}
-exports.canMergeByLabels = canMergeByLabels;
 function canMerge(pr, whitelist, blacklist) {
     const byMergeable = canMergeByMergeable(pr);
     const byMergeableState = canMergeByMergeableState(pr);
-    const byLabels = canMergeByLabels(pr, whitelist, blacklist);
     console.log('by mergeable', byMergeable);
     console.log('by mergeable state', byMergeableState);
-    console.log('by labels', byLabels);
-    return byMergeable && byMergeableState && byLabels;
+    return byMergeable && byMergeableState;
 }
 exports.default = canMerge;
 
@@ -11800,6 +11817,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const canMerge_1 = __importDefault(__webpack_require__(592));
+const isEnabledForPR_1 = __importDefault(__webpack_require__(520));
 function mergeIfReady(client, owner, repo, number, sha, config) {
     return __awaiter(this, void 0, void 0, function* () {
         const pr = yield client.pulls.get({
@@ -11807,6 +11825,9 @@ function mergeIfReady(client, owner, repo, number, sha, config) {
             repo,
             pull_number: number,
         });
+        if (!isEnabledForPR_1.default(pr.data, config.whitelist, config.blacklist)) {
+            return;
+        }
         console.log('raw pr', pr);
         console.log('pr and mergeable', pr.data.number, pr.data.mergeable, pr.data.mergeable_state);
         if (canMerge_1.default(pr.data, config.whitelist, config.blacklist)) {

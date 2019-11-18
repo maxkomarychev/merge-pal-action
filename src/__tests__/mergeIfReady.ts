@@ -1,8 +1,9 @@
+const isEnabledForPR = jest.fn()
+jest.mock('../isEnabledForPR', () => isEnabledForPR)
 const canMerge = jest.fn()
 jest.mock('../canMerge', () => canMerge)
 import mergeIfReady from '../mergeIfReady'
 import { Client, Config } from '../types'
-import { canMergeByLabels } from '../canMerge'
 const merge = jest.fn()
 const get = jest.fn()
 
@@ -18,6 +19,51 @@ describe('mergeIfReady', () => {
         merge.mockClear()
         get.mockClear()
         canMerge.mockClear()
+        isEnabledForPR.mockClear()
+    })
+    it('exits early if automation is not enabled', async () => {
+        const prNumber = 42
+        const repo = 'repo'
+        const owner = 'owner'
+        const sha = 'abcdef'
+        canMerge.mockReturnValue(false)
+        const mockPR = {
+            data: {
+                number: prNumber,
+                mergeable: false,
+                mergeable_state: 'clean',
+            },
+        }
+        const whitelist = []
+        const blacklist = []
+        const config: Config = {
+            whitelist,
+            blacklist,
+        }
+        isEnabledForPR.mockReturnValueOnce(false)
+        get.mockReturnValueOnce(mockPR)
+        await mergeIfReady(
+            (client as unknown) as Client,
+            owner,
+            repo,
+            prNumber,
+            sha,
+            config,
+        )
+        expect(isEnabledForPR).toHaveBeenCalledTimes(1)
+        expect(isEnabledForPR).toHaveBeenCalledWith(
+            mockPR.data,
+            config.whitelist,
+            config.blacklist,
+        )
+        expect(get).toHaveBeenCalledTimes(1)
+        expect(get).toHaveBeenCalledWith({
+            owner,
+            repo,
+            pull_number: prNumber,
+        })
+        expect(canMerge).toHaveBeenCalledTimes(0)
+        expect(merge).toHaveBeenCalledTimes(0)
     })
     it.each`
         method
@@ -37,6 +83,7 @@ describe('mergeIfReady', () => {
                 mergeable_state: 'clean',
             },
         }
+        isEnabledForPR.mockReturnValueOnce(true)
         get.mockReturnValue(mockPR)
         canMerge.mockReturnValue(true)
         const whitelist = []
@@ -53,6 +100,11 @@ describe('mergeIfReady', () => {
             prNumber,
             sha,
             config,
+        )
+        expect(isEnabledForPR).toHaveBeenCalledWith(
+            mockPR.data,
+            config.whitelist,
+            config.blacklist,
         )
         expect(get).toHaveBeenCalledTimes(1)
         expect(get).toHaveBeenCalledWith({
@@ -90,6 +142,7 @@ describe('mergeIfReady', () => {
             whitelist,
             blacklist,
         }
+        isEnabledForPR.mockReturnValueOnce(true)
         get.mockReturnValueOnce(mockPR)
         await mergeIfReady(
             (client as unknown) as Client,
@@ -98,6 +151,12 @@ describe('mergeIfReady', () => {
             prNumber,
             sha,
             config,
+        )
+        expect(isEnabledForPR).toHaveBeenCalledTimes(1)
+        expect(isEnabledForPR).toHaveBeenCalledWith(
+            mockPR.data,
+            config.whitelist,
+            config.blacklist,
         )
         expect(get).toHaveBeenCalledTimes(1)
         expect(get).toHaveBeenCalledWith({
