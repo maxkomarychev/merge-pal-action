@@ -46,7 +46,11 @@ export default function readConfig(filename: string) {
     const cwd = process.cwd()
     console.log('cwd', cwd)
     console.log('path?', process.env.GITHUB_WORKSPACE)
-    const data = getFileData(filename)
-    const yaml = jsyaml.safeLoad(data)
-    return parseConfig(yaml)
+    const path = process.env.GITHUB_WORKSPACE as string
+    const data = fs.readdirSync(path)
+    console.log('files', data)
+    // const data = getFileData(filename)
+    // const yaml = jsyaml.safeLoad(data)
+    // return parseConfig(yaml)
+    return { whitelist: [], blacklist: [] }
 }
