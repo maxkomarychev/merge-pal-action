@@ -45,6 +45,7 @@ function getFileData(filename: string) {
 export default function readConfig(filename: string) {
     const cwd = process.cwd()
     console.log('cwd', cwd)
+    console.log('path?', process.env.GITHUB_WORKSPACE)
     const data = getFileData(filename)
     const yaml = jsyaml.safeLoad(data)
     return parseConfig(yaml)
