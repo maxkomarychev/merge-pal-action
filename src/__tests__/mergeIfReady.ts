@@ -5,12 +5,14 @@ import { Client, Config } from '../types'
 import { canMergeByLabels } from '../canMerge'
 const merge = jest.fn()
 const get = jest.fn()
+const getBranchProtection = jest.fn()
 
 const client = {
     pulls: {
         merge,
         get,
     },
+    repos: { getBranchProtection },
 }
 
 describe('mergeIfReady', () => {
